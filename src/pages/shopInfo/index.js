@@ -1,9 +1,8 @@
 import Vue from "vue";
-import App from "./App.vue";
-import { createProvider } from "./vue-apollo";
+import shopInfo from "./index.vue";
+import { createProvider } from "../../vue-apollo";
 Vue.config.productionTip = false;
-alert("llll");
 new Vue({
   apolloProvider: createProvider(),
-  render: h => h(App)
+  render: h => h(shopInfo)
 }).$mount("#app");

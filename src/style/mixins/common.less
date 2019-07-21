@@ -1,0 +1,36 @@
+//颜色
+@color-origin: #FB701F;
+@color-title: #333333;
+@color-content: #7C7C7C;
+@color-blue: #3699F9;
+//字体
+@font-page: 24px;
+
+//mixin
+.font-style(@color: @color-title, @size: 24px) {
+  color: @color;
+  font-size: @size;
+}
+
+.content-box(@tb: 20px) {
+  background: #fff;
+  padding: @tb 40px;
+}
+
+//display:flex;
+
+.flex(@align1: space-between, @align2: center) {
+  display: flex;
+  justify-content: @align1;
+  align-items: @align2;
+}
+
+.common-btn(@width: 110px, @height: 35px, @borderColor: #333333) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: @width;
+  height: @height;
+  border-radius: @height;
+  border: 1px solid @borderColor;
+}
