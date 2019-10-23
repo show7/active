@@ -2,70 +2,79 @@
   <div class="good-info-wrap">
     <div class="good-banner-swiper">
       <!-- 异步加载轮播图的情况 -->
-      <Swiper v-if="list.length > 0">
-        <Slide v-for="(item, index) in list" :key="index">
-          <img src="" alt="" />
+      <Swiper v-if="banners.length > 0">
+        <Slide v-for="(item, index) in banners" :key="index">
+          <img :src="item" alt="" />
         </Slide>
       </Swiper>
     </div>
     <div class="good-info">
-      <div class="good-info-price">￥<span>85.00</span></div>
-      <div class="good-info-title">鼎合 GT5 SJ 合成汽车润滑油</div>
-      <div class="good-info-sub">汽配协会自营 正品保障 12桶起售</div>
+      <div class="good-info-price">
+        ￥<span>{{ goodInfo.goodSalePrice }}</span>
+      </div>
+      <div class="good-info-title">{{ goodInfo.name }}</div>
+      <div class="good-info-sub">{{ goodInfo.subTitle }}</div>
     </div>
     <br />
     <div class="good-address-box">
       <div>
-        <div>发货<span class="meniu-content">上海 | 快递：8元</span></div>
-        <div>已售：1789</div>
+        <div>
+          发货<span v-show="goodInfo.shippingAddress" class="meniu-content"
+            >{{ goodInfo.shippingAddress }} | 快递费:{{
+              goodInfo.freight
+            }}</span
+          >
+        </div>
+        <div>已售：{{ goodInfo.goodsSales }}</div>
       </div>
       <div>
         <div>优惠</div>
-        <div>领券<span> ></span></div>
+        <div @click="downLoadApp">领券<span> ></span></div>
       </div>
     </div>
     <br />
     <div class="good-address-box">
       <div>
         <div>
-          服务<span class="meniu-content">不支持7天无理由·10天内发货</span>
+          服务<span class="meniu-content">{{ goodInfo.terms }}</span>
         </div>
         <div><span> ＞</span></div>
       </div>
       <div>
-        <div>规格<span class="meniu-content">品牌 型号…</span></div>
-        <div>领券<span> ＞</span></div>
+        <div>
+          规格
+        </div>
+        <div class="meniu-content" v-html="goodInfo.goodParamter" />
+        <!-- <div>领券<span> ＞</span></div> -->
       </div>
     </div>
     <br />
-    <div class="good-evaluate-box">
+    <div v-show="total" class="good-evaluate-box">
       <div>
-        <div>宝贝评价(30)</div>
-        <div class="see-more">查看全部 ＞</div>
+        <div>宝贝评价({{ total }})</div>
+        <div class="see-more" @click="downLoadApp">查看全部 ＞</div>
       </div>
-      <div class="good-evaluate-user">
-        <img
-          src="https://avatars2.githubusercontent.com/u/29848297?s=40&v=4"
-          alt=""
-        />
-        <div class="user-name">哈**哈</div>
+      <div v-for="(item, index) in comments" :key="index">
+        <div class="good-evaluate-user">
+          <img :src="item.user.profilePicture" alt="" />
+          <div class="user-name">{{ item.user.name }}</div>
+        </div>
+        <div>{{ item.comment }}</div>
       </div>
-      <div>还没收到，不过应该不错，收到后再来追加评</div>
     </div>
     <br />
     <div class="good-shop-card">
       <div>
-        <img
-          src="https://avatars2.githubusercontent.com/u/29848297?s=40&v=4"
-          alt="1212"
-        />
-        <span class="good-shop-name">邻家小铺</span>
+        <img :src="shopInfo.cover" alt="1212" />
+        <span class="good-shop-name">{{ shopInfo.name }}</span>
       </div>
-      <div class="go-shop-button">进入店铺</div>
+      <div class="go-shop-button" @click="downLoadApp">进入店铺</div>
     </div>
     <br />
     <div class="good-shop-info">
-      <div v-html="html"></div>
+      <div>
+        {{ shopInfo.description }}
+      </div>
     </div>
     <br />
     <br />
@@ -75,7 +84,7 @@
     <br />
     <br />
     <br />
-    <div class="fiexd-bottom-button">
+    <div class="fiexd-bottom-button" @click="downLoadApp">
       <img
         class="fiexd-bottom-button-icon"
         src="../../assets/images/call_helper.png"
@@ -95,18 +104,26 @@
 </template>
 <script>
 import { Swiper, Slide } from "vue-swiper-component";
-import { Goods } from "../api";
+import { Goods, Shop, Banners, Comments } from "api";
 import { getQueryString } from "../../util";
 
 export default {
+  components: {
+    Swiper,
+    Slide
+  },
   data() {
     return {
-      list: [1, 2, 3],
-      html: "<p>dadkjadliajdajdla</p>"
+      goodInfo: {},
+      banners: [],
+      html: "<p>dadkjadliajdajdla</p>",
+      total: "",
+      comments: [],
+      shopInfo: {}
     };
   },
   mounted() {
-    console.log(getQueryString("id"));
+    console.log(getQueryString("goodId"));
   },
   apollo: {
     queryGood() {
@@ -117,14 +134,14 @@ export default {
         variables() {
           return {
             input: {
-              id: getQueryString("id")
+              id: getQueryString("goodId")
             }
           };
         },
         // 可选结果钩子
         result({ data }) {
           if (!data) return;
-
+          this.goodInfo = data.good;
           // this.categories = data.good.categories.map(item => item.id);
           console.log(data);
           // this.ruleForm = data.good;
@@ -133,15 +150,16 @@ export default {
     },
     banners() {
       return {
-        query: Goods.banners,
+        query: Banners.query,
         variables() {
           return {
-            bannerQueryInput: { bannerTypeId: getQueryString("id") }
+            input: { bannerTypeId: getQueryString("goodId") }
           };
         },
         result({ data }) {
           if (!data) return;
           console.log(data);
+          this.banners = data.banners.map(item => item.path);
           // this.banners = data.banners.map(item => {
           //   return {
           //     url: item.path
@@ -150,11 +168,50 @@ export default {
           // this.ruleForm.banners = data.banners.map(item => item.path);
         }
       };
+    },
+    queryComments() {
+      return {
+        query: Comments.query,
+        variables() {
+          return {
+            getCommentInput: {
+              typeId: getQueryString("goodId"),
+              limit: 1,
+              offset: 1
+            }
+          };
+        },
+        result({ data }) {
+          if (!data) return;
+          this.total = data.comments.pageInfo.total;
+          this.comments = data.comments.edges;
+          console.log(data);
+        }
+      };
+    },
+    shop() {
+      return {
+        query: Shop.shop,
+        skip: () => !this.goodInfo.shopId,
+        variables() {
+          return {
+            input: {
+              id: this.goodInfo.shopId
+            }
+          };
+        },
+        result({ data }) {
+          if (!data) return;
+          console.log(data);
+          this.shopInfo = data.shop;
+        }
+      };
     }
   },
-  components: {
-    Swiper,
-    Slide
+  methods: {
+    downLoadApp() {
+      window.location.href = "http://www.baidu.com";
+    }
   }
 };
 </script>
@@ -164,7 +221,6 @@ export default {
   .wh_content {
     width: 750px;
     height: 750px;
-    border: 1px solid red;
     img {
       width: 100%;
     }
@@ -235,6 +291,10 @@ export default {
     .flex;
     > div:first-child {
       .flex;
+      img {
+        width: 80px;
+        height: 80px;
+      }
     }
     .good-shop-name {
       .font-style(@size:26px);

@@ -4,108 +4,145 @@
       <img src="../../assets/images/title.png" alt="" />
       <img src="../../assets/images/taili.png" alt="" />
       <br />
-      <div class="rotary-btn">
+      <div class="rotary-btn" @click="checkIn">
         <img src="../../assets/images/qiandao.png" alt="" />
       </div>
     </div>
     <img class="rotary-title" src="../../assets/images/choujiang.png" alt="" />
     <div id="rotary-table">
       <div
-        class="award"
         v-for="(award, index) in awards"
-        :class="['award' + index]"
         :key="index"
+        class="award"
+        :class="['award' + index]"
       >
-        <img class="gift-img" :src="award.image" alt="" />
-        <div :class="['awards', { active: index == current }]"></div>
+        <img class="gift-img" :src="award.cover" alt="" />
+        <div class="gift-award-gold">{{ award.gold }}</div>
+        <div :class="['awards', { active: index == current }]" />
       </div>
       <div id="start-btn" @click="start">开始抽奖</div>
     </div>
   </div>
 </template>
 <script>
+import { Activity } from "api";
+import { getQueryString } from "util";
+import { Toast } from "vant";
+const userId = getQueryString("userId");
 export default {
-  name: "raffle",
+  name: "Raffle",
   data() {
     return {
       current: 0,
-      awards: [
-        {
-          id: 1,
-          name: "空",
-          image:
-            "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
-        },
-        {
-          id: 2,
-          name: "眼镜",
-          image:
-            "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
-        },
-        {
-          id: 3,
-          name: "包",
-          image:
-            "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
-        },
-        {
-          id: 4,
-          name: "笨驴",
-          image:
-            "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
-        },
-        {
-          id: 5,
-          name: "书",
-          image:
-            "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
-        },
-        {
-          id: 6,
-          name: "手链",
-          image:
-            "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
-        },
-        {
-          id: 7,
-          name: "美女",
-          image:
-            "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
-        },
-        {
-          id: 8,
-          name: "iphone",
-          image:
-            "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
-        }
-      ],
+      userId,
+      // awards: [
+      //   {
+      //     id: 1,
+      //     name: "空",
+      //     image:
+      //       "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
+      //   },
+      //   {
+      //     id: 2,
+      //     name: "眼镜",
+      //     image:
+      //       "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
+      //   },
+      //   {
+      //     id: 3,
+      //     name: "包",
+      //     image:
+      //       "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
+      //   },
+      //   {
+      //     id: 4,
+      //     name: "笨驴",
+      //     image:
+      //       "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
+      //   },
+      //   {
+      //     id: 5,
+      //     name: "书",
+      //     image:
+      //       "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
+      //   },
+      //   {
+      //     id: 6,
+      //     name: "手链",
+      //     image:
+      //       "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
+      //   },
+      //   {
+      //     id: 7,
+      //     name: "美女",
+      //     image:
+      //       "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
+      //   },
+      //   {
+      //     id: 8,
+      //     name: "iphone",
+      //     image:
+      //       "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
+      //   }
+      // ],
       speed: 200,
       diff: 15,
       award: {},
       time: 0
     };
   },
+  apollo: {
+    awards() {
+      return {
+        query: Activity.query,
+        update: value => {
+          console.log(value);
+          return value.activity.products;
+        }
+      };
+    }
+  },
   methods: {
     start() {
       // 开始抽奖
       this.drawAward();
-
       this.time = Date.now();
       this.speed = 200;
       this.diff = 15;
     },
-    drawAward() {
+    async checkIn() {
+      try {
+        await this.$apollo.mutate({
+          mutation: Activity.checkIn,
+          variables: {
+            userId: this.userId
+          }
+        });
+        Toast("签到成功");
+      } catch (e) {
+        const message = e.message.split(":")[1];
+        Toast(message);
+      }
+    },
+    async drawAward() {
       // 请求接口, 这里我就模拟请求后的数据(请求时间为2s)
-      setTimeout(() => {
-        this.award = {
-          id: 4,
-          name: "笨驴",
-          image:
-            "https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1563686049&di=1360772e2b7cd4ae5d2c058a8c7e5be4&imgtype=jpg&er=1&src=http%3A%2F%2Fwww.adwzw.com%2Fuploadfile%2F2018%2F0611%2F20180611054725305.jpg"
-        };
-      }, 1000);
-
-      this.move();
+      try {
+        const { data } = await this.$apollo.mutate({
+          mutation: Activity.luckDraw,
+          variables: {
+            input: {
+              userId: this.userId,
+              activityId: "YWN0aXZpdHkvMg=="
+            }
+          }
+        });
+        console.log(data);
+        this.award = data.luckDraw;
+        this.move();
+      } catch (e) {
+        const message = e.message.split(":")[1];
+        Toast(message);
+      }
     },
     move() {
       window.timeout = setTimeout(() => {
@@ -121,7 +158,7 @@ export default {
           ) {
             clearTimeout(window.timeout);
             setTimeout(() => {
-              alert("恭喜你，抽中了" + this.award.name);
+              Toast(`恭喜你，抽中了${this.award.gold}${this.award.name}`);
             }, 0);
             return;
           }
@@ -257,5 +294,16 @@ export default {
 .rotary-title {
   display: block;
   margin: 50px auto;
+}
+.gift-award-gold {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  font-size: 5vmin;
+  justify-content: center;
+  align-items: center;
 }
 </style>

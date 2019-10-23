@@ -7,7 +7,8 @@ module.exports = {
       viewportUnit: "vw",
       selectorBlackList: [".ignore", ".hairlines"],
       minPixelValue: 1,
-      mediaQuery: false
+      mediaQuery: false,
+      exclude: /(\/|\\)(node_modules)(\/|\\)/
     }
   }
 };
